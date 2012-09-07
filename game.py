@@ -40,6 +40,16 @@ class Game():
             else:
                 return 'king'
 
+    def round(self):
+        """
+        A game round. Called by the game class itself whenever the player wants
+        to play a hand.
+
+        Returns either 0 if the player loses, 1 if the player wins, and 2 if
+        the round is a draw.
+        """
+        # Nothing here for now
+
     def __init__(self, chips_start):
         """ Initialization function """
         # Set the starting chips of the player to the passed value
@@ -48,4 +58,29 @@ class Game():
         self.total_hands = 0
         self.won_hands = 0
         self.lost_hands = 0
+
+        option = 'no'
+        while option not 'yes':
+            print 'Round ' + str(self.total_hands + 1)
+            
+            if self.round() == 1:
+                # Round returned a 1, which means the player won
+                # Increment the number of winning hands
+                self.won_hands += 1
+                print 'Congratulations, you won this round!'
+
+            elif self.round() == 2:
+                # Round returned a 2, which means the round was a draw
+                print 'Push!'
+
+            else:
+                # Round returned a 0, which means the player lost
+                # Increment the number of lost hands
+                self.lost_hands = 0
+                print 'Sorry, you lost!'
+
+            # Increment the number of total hands
+            self.total_hands += 1
+
+            option = raw_input("Go for another round? [yes/no]: ")
 

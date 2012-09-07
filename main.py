@@ -7,4 +7,4 @@
 # Import everything from the games module
 from game import *
 
-printf 'Hello world!'
+print 'Hello world!'
