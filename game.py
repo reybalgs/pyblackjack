@@ -40,6 +40,33 @@ class Game():
             else:
                 return 'king'
 
+    def display_stats(self):
+        """Displays game stats such as number of chips and hands played."""
+        print '\n=====\nStats\n====='
+        print 'Chips: ' + str(self.chips)
+        print 'Hands played: ' + str(self.total_hands)
+        print 'Hands won: ' + str(self.won_hands)
+        print 'Hands lost: ' + str(self.lost_hands)
+        print '\n'
+
+    def display_cards(self):
+        """Displays the cards of the dealer and the player."""
+        # Dealer cards
+        print '\n======\nDealer\n======'
+        print 'Strength: ' + str(self.dealer_strength)
+        print 'Cards: ',
+        for card in self.dealer_cards:
+            print str(card),
+        print '\n'
+        
+        # Player cards
+        print '\n======\nPlayer\n======'
+        print 'Strength: ' + str(self.player_strength)
+        print 'Cards: ',
+        for card in self.player_cards:
+            print str(card),
+        print '\n'
+
     def round(self):
         """
         A game round. Called by the game class itself whenever the player wants
@@ -58,9 +85,15 @@ class Game():
         self.total_hands = 0
         self.won_hands = 0
         self.lost_hands = 0
+        # Initialize the hands of the dealer and the player
+        self.dealer_cards = []
+        self.player_cards = []
+        # Initialize the hand strengths of the dealer and the player
+        self.dealer_strength = 0
+        self.player_strength = 0
 
         option = 'no'
-        while option not 'yes':
+        while not option is 'no':
             print 'Round ' + str(self.total_hands + 1)
             
             if self.round() == 1:
