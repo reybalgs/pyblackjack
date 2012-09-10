@@ -40,6 +40,42 @@ class Game():
             else:
                 return 'king'
 
+    def adjust_strength(self, hand):
+        """Returns an int strength, based on the hand passed as an argument"""
+        strength = 0 # initialize to 0
+        aces_total = 0 # total number of aces in the hand
+        aces_lowered = 0 # soft aces lowered to 1
+        for card in hand:
+            if(card is 'king' or card is 'queen' or card is 'jack' or 
+                    card == 10):
+                # We have a card with a power of 10
+                strength += 10
+            elif card is 'ace':
+                # We have an ace
+                aces_total += 1
+                if ((strength + 11) > 21):
+                    # Adding 21 would bust, so the ace turns into 1
+                    strength += 1
+                    aces_lowered += 1
+                else:
+                    strength += 11
+            else:
+                # We have a numbered card
+                strength += card
+           
+            # Now we need to check if we are supposedly bust, but let's check
+            # first if we have an ace that we can lower
+            if strength > 21:
+                for card in hand:
+                    if card is 'ace':
+                        if aces_lowered < aces_total:
+                            # We can still lower this ace
+                            strength -= 10
+                            aces_lowered += 1
+
+        # Return the hand strength
+        return strength
+
     def display_stats(self):
         """Displays game stats such as number of chips and hands played."""
         print '\n=====\nStats\n====='
@@ -75,7 +111,18 @@ class Game():
         Returns either 0 if the player loses, 1 if the player wins, and 2 if
         the round is a draw.
         """
-        # Nothing here for now
+        # First we need to ask the user for their wager
+        while wager < 1 or wager > 1000:
+            wager = input('Please input your wager (1-1000): ')
+            if wager < 1 or wager > 1000:
+                print 'Invalid input! Try again.'
+
+        # Now let's draw a card for the dealer
+        card = self.draw_card()
+        self.dealer_cards.append(card)
+        # Draw a card for the player
+        card = self.draw_card()
+        self.player_cards.append(card)
 
     def __init__(self, chips_start):
         """ Initialization function """
