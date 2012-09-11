@@ -104,6 +104,18 @@ class Game():
             print str(card) + ' ',
         print '\n'
 
+    def display_dealer_cards(self, dealer_strength, dealer_cards):
+        """
+        Displays the cards and strength of the dealer only. Could be useful in
+        split plays.
+        """
+        print '\n======\nDealer\n======'
+        print 'Strength: ' + stsr(dealer_strength)
+        print 'Cards: ',
+        for card in dealer_cards:
+            print str(card) + ' ',
+        print '\n'
+
     def display_split_cards(self, first_hand, first_strength, second_hand,
             second_strength):
         """Displays the two hands of the player after a split"""
