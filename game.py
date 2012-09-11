@@ -5,6 +5,7 @@
 # mechanics.
 
 import random
+import sys
 
 class Game():
     """
@@ -40,12 +41,14 @@ class Game():
             else:
                 return 'king'
 
-    def adjust_strength(self, hand):
+    def adjust_strength(self, hand, hidden_card = 0):
         """Returns an int strength, based on the hand passed as an argument"""
         strength = 0 # initialize to 0
         aces_total = 0 # total number of aces in the hand
         aces_lowered = 0 # soft aces lowered to 1
         for card in hand:
+            # DEBUG MESSAGE TODO: REMOVE THIS
+            print 'Card is ' + str(card)
             if(card is 'king' or card is 'queen' or card is 'jack' or 
                     card == 10):
                 # We have a card with a power of 10
@@ -59,6 +62,20 @@ class Game():
                     aces_lowered += 1
                 else:
                     strength += 11
+            elif card is '?':
+                # We are dealing with a hidden card
+                if (hidden_card is 'king' or hidden_card is 'queen' or 
+                        hidden_card is 'jack' or hidden_card == 10):
+                    strength += 10
+                elif hidden_card is 'ace':
+                    aces_total += 1
+                    if ((strength + 11) > 21):
+                        strength += 1
+                        aces_lowered += 1
+                    else:
+                        strength += 11
+                else:
+                    strength += hidden_card
             else:
                 # We have a numbered card
                 strength += card
@@ -79,7 +96,7 @@ class Game():
     def display_stats(self):
         """Displays game stats such as number of chips and hands played."""
         print '\n=====\nStats\n====='
-        print 'Chips: ' + str(self.chips)
+        print 'Chips: ' + str(self.player_chips)
         print 'Hands played: ' + str(self.total_hands)
         print 'Hands won: ' + str(self.won_hands)
         print 'Hands lost: ' + str(self.lost_hands)
@@ -110,7 +127,7 @@ class Game():
         split plays.
         """
         print '\n======\nDealer\n======'
-        print 'Strength: ' + stsr(dealer_strength)
+        print 'Strength: ' + str(dealer_strength)
         print 'Cards: ',
         for card in dealer_cards:
             print str(card) + ' ',
@@ -145,6 +162,8 @@ class Game():
         """
         # Temporary option var
         option = 0
+        # Wager var
+        wager = 0
 
         # Variables for dealer and player
         dealer_strength = 0
@@ -173,11 +192,13 @@ class Game():
         # Now let's draw a card for the dealer
         card = self.draw_card()
         dealer_cards.append(card)
+        dealer_strength = self.adjust_strength(dealer_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
         # Draw a card for the player
         card = self.draw_card()
         player_cards.append(card)
+        player_strength = self.adjust_strength(player_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
         # Draw a hidden card for the dealer
@@ -186,10 +207,11 @@ class Game():
         dealer_cards.append('?')
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
-        dealer_strength = self.adjust_strength(dealer_cards)
+        dealer_strength = self.adjust_strength(dealer_cards, hidden_card)
         # Draw the second card for the player
         card = self.draw_card()
         player_cards.append(card)
+        player_strength = self.adjust_strength(player_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
 
@@ -327,3 +349,10 @@ class Game():
 
             option = raw_input("Go for another round? [yes/no]: ")
 
+def main():
+    """ Test main func for testing purposes """
+    game = Game(5000)
+    game.round()
+
+if __name__ == "__main__":
+    sys.exit(main())
