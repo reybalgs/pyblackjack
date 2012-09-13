@@ -6,6 +6,8 @@
 
 import random
 import sys
+import os
+import pdb
 
 class Game():
     """
@@ -14,6 +16,10 @@ class Game():
     The main main class (excuse the term) creates an instance of the Game class
     whenever the player starts with a new game.
     """
+    def clear(self):
+        """A little screen clearing function"""
+        os.system("clear")
+
     def draw_card(self):
         """
         Draws a random card and returns its numerical/face value.
@@ -161,7 +167,7 @@ class Game():
         the round is a draw.
         """
         # Temporary option var
-        option = 0
+        option = ''
         # Wager var
         wager = 0
 
@@ -184,6 +190,7 @@ class Game():
             if wager < 1 or wager > 1000:
                 print 'Invalid input! Try again.'
 
+        self.clear()
         # Decrease the chips with the wager
         self.player_chips -= wager
 
@@ -195,125 +202,186 @@ class Game():
         dealer_strength = self.adjust_strength(dealer_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
+        raw_input()
+        self.clear()
         # Draw a card for the player
         card = self.draw_card()
         player_cards.append(card)
         player_strength = self.adjust_strength(player_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
+        raw_input()
+        self.clear()
         # Draw a hidden card for the dealer
         card = self.draw_card()
         hidden_card = card
         dealer_cards.append('?')
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
-        dealer_strength = self.adjust_strength(dealer_cards, hidden_card)
+        raw_input()
+        self.clear()
         # Draw the second card for the player
         card = self.draw_card()
         player_cards.append(card)
         player_strength = self.adjust_strength(player_cards)
         self.display_cards(dealer_strength, dealer_cards, player_strength,
                 player_cards)
+        raw_input()
+        self.clear()
+
+        # TODO: This is a debug message; remove this later in release
+        print 'Initial card drawing complete'
+        # TODO: Remove pdb.set_trace() in release
+        # pdb.set_trace()
 
         # Now let's ask the player for input
-        while ((player_strength <= 21 or (first_strength <= 21 or
-                second_strength <= 21)) and dealer_strength <= 21):
-            while not (option is 's' or option is 'S') or player_strength <= 21:
-                if player_cards[0] == player_cards[1] and (wager * 2 >
-                        self.player_chips):
-                    # Player can both split and double
-                    option = raw_input('Would you like to:\n\t[H]it' +
-                            '\n\t[S]tay\n\t[D]ouble\n\ts[P]lit\nOption: ')
-                    if option is 'h' or option is 'H':
-                        while player_strength < 21 and (option is not 's' or
-                                option is not 'S'):
-                            # Player wants to hit, draw another card
-                            card = self.draw_card()
-                            player_cards.append(card)
-
-                            if player_strength > 21:
-                                # Player has gone bust
-                                print 'You have gone bust!'
-                            elif player_strength < 21:
-                                # Player isn't bust yet or got 21
-                                option = raw_input('[H]it or [S]tay? ')
-                        option = 0 # reset option var
-
-                    elif option is 'p' or option is 'P':
-                        # Player wants to split
-                        # Double the player's wager
-                        self.player_chips -= wager
-                        wager = wager * 2
-                        print 'Hand 1'
-                        # Adjust the two new hands of the player
-                        first_hand = [player_cards[0]]
-                        first_strength = self.adjust_strength(first_hand)
-                        second_hand = [player_cards[1]]
-                        second_strength = self.adjust_strength(second_hand)
-                        self.display_split_cards(first_hand,
-                                first_strength, second_hand,
-                                second_strength)
-                        while first_strength < 21 or not (option is 'S' or
-                                option is 's'):
-                            option = raw_input('[H]it or [S]tay: ')
-                            if option is 'h' or option is 'H':
-                                card = self.draw_card()
-                                first_hand.append(card)
-                                first_strength = self.adjust_strength(first_hand)
-                                self.display_split_cards(first_hand,
-                                        first_strength, second_hand,
-                                        second_strength)
-                        
-                        option = 0 # reset option
-                        while second_strength < 21 or not (option is 'S' or
-                                option is 's'):
-                            option = raw_input('[H]it or [S]tay: ')
-                            if option is 'h' or option is 'H':
-                                card = self.draw_card()
-                                second_hand.append(card)
-                                second_strength = self.adjust_strength(second_hand)
-                                self.display_split_cards(first_hand,
-                                        first_strength, second_hand,
-                                        second_strength)
-
-                    elif option is 'd' or option is 'D':
-                        # Player wants to double
-                        self.player_chips -= wager
-                        wager = wager * 2
-                        # Draw the player's last card
+        while (option != 's' and option != 'S') and player_strength <= 21:
+            if (player_cards[0] == player_cards[1] and 
+                    (wager * 2 <= self.player_chips)):
+                # Player can both split and double
+                option = raw_input('Would you like to:\n\t[H]it' +
+                        '\n\t[S]tay\n\t[D]ouble\n\ts[P]lit\nOption: ')
+                if option is 'h' or option is 'H':
+                    while player_strength < 21 and (option is not 's' or
+                            option is not 'S'):
+                        # Player wants to hit, draw another card
                         card = self.draw_card()
                         player_cards.append(card)
                         player_strength = self.adjust_strength(player_cards)
                         self.display_cards()
+                        if player_strength < 21:
+                            # Player isn't bust yet or got 21
+                            option = raw_input('[H]it or [S]tay? ')
 
-                    # Now it's timme for the dealer to keep drawing cards until
-                    # they go bust
-                    while not (dealer_strength <= 21 and dealer_strength > 21):
+                elif option is 'p' or option is 'P':
+                    # Player wants to split
+                    # Double the player's wager
+                    self.player_chips -= wager
+                    wager = wager * 2
+                    print 'Hand 1'
+                    # Adjust the two new hands of the player
+                    first_hand = [player_cards[0]]
+                    first_strength = self.adjust_strength(first_hand)
+                    second_hand = [player_cards[1]]
+                    second_strength = self.adjust_strength(second_hand)
+                    self.display_split_cards(first_hand,
+                            first_strength, second_hand,
+                            second_strength)
+                    while first_strength < 21 or not (option is 'S' or
+                            option is 's'):
+                        option = raw_input('[H]it or [S]tay: ')
+                        if option is 'h' or option is 'H':
+                            card = self.draw_card()
+                            first_hand.append(card)
+                            first_strength = self.adjust_strength(first_hand)
+                            self.display_split_cards(first_hand,
+                                    first_strength, second_hand,
+                                    second_strength)
+
+                    while second_strength < 21 or not (option is 'S' or
+                            option is 's'):
+                        option = raw_input('[H]it or [S]tay: ')
+                        if option is 'h' or option is 'H':
+                            card = self.draw_card()
+                            second_hand.append(card)
+                            second_strength = self.adjust_strength(second_hand)
+                            self.display_split_cards(first_hand,
+                                    first_strength, second_hand,
+                                    second_strength)
+
+                elif option is 'd' or option is 'D':
+                    # Player wants to double
+                    self.player_chips -= wager
+                    wager = wager * 2
+                    # Draw the player's last card
+                    card = self.draw_card()
+                    player_cards.append(card)
+                    player_strength = self.adjust_strength(player_cards)
+                    self.display_cards()
+
+            elif (wager * 2 <= self.player_chips):
+                # Player cannot split, but can double
+                option = raw_input('Would you like to:\n\t[H]it' +
+                       '\n\t[S]tay\n\t[D]ouble\nOption: ')
+                if option is 'h' or option is 'H':
+                    while player_strength <= 21 and (option is not 's' or
+                            option is not 'S'):
+                        # Player wants to hit, draw another card
                         card = self.draw_card()
-                        dealer_cards.append(card)
-                        dealer_strength = self.adjust_strength(dealer_cards)
-                        self.display_cards()
+                        player_cards.append(card)
+                        player_strength = self.adjust_strength(player_cards)
+                        self.display_cards(dealer_strength, dealer_cards,
+                                player_strength, player_cards)
+                        if player_strength < 21:
+                            option = raw_input('[H]it or [S]tay? ')
 
-                    if not dealer_strength > 21:
-                        # Dealer has not gone bust
-                        if dealer_strength > player_strength:
-                            print 'Dealer wins'
-                            self.lost_hands += 1
-                        elif dealer_strength < player_strength:
-                            print 'Player wins'
-                            self.won_hands += 1
-                            self.player_chips += wager * 2
-                        else:
-                            print 'Push'
-                            self.player_chips += wager
-                    else:
-                        # Dealer's gone bust
-                        print 'Player wins'
-                        self.won_hands += 1
-                        self.player_chips += wager * 2
+                elif option is 'd' or option is 'D':
+                    self.player_chips -= wager
+                    wager = wager * 2
+                    # Draw the last card for the player
+                    card = self.draw_card()
+                    player_cards.append(card)
+                    player_strength = self.adjust_strength(player_cards)
+                    self.display_cards(dealer_strength, dealer_cards,
+                            player_strength, player_cards)
 
-                    # Increment total number of hands
-                    self.total_hands += 1
+            else:
+                # Player cannot split or double
+                option = raw_input('Would you like to:\n\t[H]it' +
+                        '\n\t[S]tay\nOption: ')
+                if option is 'h' or option is 'H':
+                    while player_strength < 21 and (option is not 's' or
+                            option is not 'S'):
+                        # Player wants to hit
+                        card = self.draw_card()
+                        player_cards.append(card)
+                        player_strength = self.adjust_strength(player_cards)
+                        if player_strength < 21:
+                            option = raw_input('[H]it or [S]tay? ')
+
+        if player_strength > 21:
+            # Player is bust
+            print 'You have gone bust!'
+            self.lost_hands += 1
+        else:
+            # Reveal the dealer's hidden card
+            dealer_cards.pop() # removes the '?'
+            dealer_cards.append(hidden_card)
+            dealer_strength = self.adjust_strength(dealer_cards)
+            self.display_cards(dealer_strength, dealer_cards, player_strength,
+                    player_cards)
+            raw_input()
+            self.clear()
+            # Now the dealer will keep drawing
+            while dealer_strength < 17:
+                card = self.draw_card()
+                dealer_cards.append(card)
+                dealer_strength = self.adjust_strength(dealer_cards)
+                self.display_cards(dealer_strength, dealer_cards,
+                        player_strength, player_cards)
+                raw_input()
+
+            if not dealer_strength > 21:
+                # Dealer has not gone bust
+                if dealer_strength > player_strength:
+                    print 'Dealer wins'
+                    self.lost_hands += 1
+                elif dealer_strength < player_strength:
+                    print 'Player wins'
+                    self.won_hands += 1
+                    self.player_chips += wager * 2
+                else:
+                    print 'Push'
+                    self.player_chips += wager
+            else:
+                # Dealer's gone bust
+                print 'Player wins'
+                self.won_hands += 1
+                self.player_chips += wager * 2
+
+        # Increment number of hands
+        self.total_hands += 1
+        print 'End of round!'
 
     def __init__(self, chips_start):
         """ Initialization function """
@@ -327,7 +395,7 @@ class Game():
         option = 'no'
         while not option is 'no':
             print 'Round ' + str(self.total_hands + 1)
-            
+
             if self.round() == 1:
                 # Round returned a 1, which means the player won
                 # Increment the number of winning hands
