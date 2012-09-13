@@ -180,6 +180,7 @@ class Game():
         second_hand = []
         second_strength = 0
 
+        self.clear()
         self.display_stats()
 
         # First we need to ask the user for their wager
@@ -240,6 +241,7 @@ class Game():
                     while player_strength < 21 and (option is not 's' and
                             option is not 'S'):
                         # Player wants to hit, draw another card
+                        self.clear()
                         card = self.draw_card()
                         player_cards.append(card)
                         player_strength = self.adjust_strength(player_cards)
@@ -298,6 +300,8 @@ class Game():
                                     first_strength, second_hand,
                                     second_strength)
                         elif option is 'd' or option is 'D':
+                            self.player_chips -= wager
+                            wager = wager * 2
                             card = self.draw_card()
                             first_hand.append(card)
                             first_strength = self.adjust_strength(first_hand)
@@ -331,7 +335,8 @@ class Game():
                     card = self.draw_card()
                     player_cards.append(card)
                     player_strength = self.adjust_strength(player_cards)
-                    self.display_cards()
+                    self.display_cards(dealer_strength, dealer_cards,
+                            player_strength, player_cards)
                     option = 'S' # the player will now stay
 
             elif (wager * 2 <= self.player_chips):
@@ -342,6 +347,7 @@ class Game():
                     while player_strength <= 21 and (option != 's' and
                             option != 'S'):
                         # Player wants to hit, draw another card
+                        self.clear()
                         card = self.draw_card()
                         player_cards.append(card)
                         player_strength = self.adjust_strength(player_cards)
@@ -366,7 +372,7 @@ class Game():
                 option = raw_input('Would you like to:\n\t[H]it' +
                         '\n\t[S]tay\nOption: ')
                 if option is 'h' or option is 'H':
-                    while player_strength < 21 and (option is not 's' or
+                    while player_strength < 21 and (option is not 's' and
                             option is not 'S'):
                         # Player wants to hit
                         card = self.draw_card()
@@ -374,7 +380,8 @@ class Game():
                         player_strength = self.adjust_strength(player_cards)
                         if player_strength < 21:
                             option = raw_input('[H]it or [S]tay? ')
-
+        
+        # Winning evaluation
         self.clear()
         if len(first_hand) == 0 and len(second_hand) == 0:
             # We don't have a split
@@ -383,7 +390,7 @@ class Game():
                 self.display_cards(dealer_strength, dealer_cards, player_strength,
                         player_cards)
                 print 'You have gone bust!'
-                self.lost_hands += 1
+                return 0
             else:
                 # Reveal the dealer's hidden card
                 dealer_cards.pop() # removes the '?'
@@ -406,19 +413,20 @@ class Game():
                     # Dealer has not gone bust
                     if dealer_strength > player_strength:
                         print 'Dealer wins'
-                        self.lost_hands += 1
+                        return 0
                     elif dealer_strength < player_strength:
                         print 'Player wins'
-                        self.won_hands += 1
                         self.player_chips += wager * 2
+                        return 1
                     else:
                         print 'Push'
                         self.player_chips += wager
+                        return 2
                 else:
                     # Dealer's gone bust
                     print 'Player wins'
-                    self.won_hands += 1
                     self.player_chips += wager * 2
+                    return 1
         else:
             # We have a split
             if first_strength > 21 and second_strength > 21:
@@ -426,7 +434,7 @@ class Game():
                 self.display_split_cards(first_hand, first_strength,
                         second_hand, second_strength)
                 print 'You have gone bust!'
-                self.lost_hands += 2
+                return 0
             else:
                 # One or no hands are bust
                 # Reveal the dealer's hidden card
@@ -455,57 +463,52 @@ class Game():
                         # Second hand is still ok
                         if dealer_strength > second_strength:
                             print 'Dealer wins'
-                            self.lost_hands += 2
+                            return 0
                         elif dealer_strength < second_strength:
                             print 'Second hand wins'
-                            self.won_hands += 1
                             self.player_chips += wager / 2
+                            return 0
                         else:
                             print 'Second hand push'
-                        self.lost_hands += 1
+                            return 0
                     elif second_strength > 21:
                         # First hand is still ok
                         if dealer_strength > first_strength:
                             print 'Dealer wins'
-                            self.lost_hands += 2
+                            return 0
                         elif dealer_strength < first_strength:
                             print 'First hand wins'
-                            self.won_hands += 1
                             self.player_chips += wager / 2
+                            return 0
                         else:
                             print 'Second hand push'
-                            self.won_hands += 1
-                        self.lost_hands += 1
+                            return 0
                     else:
                         # Both hands aren't bust
                         if (dealer_strength > first_strength and
                                 dealer_strength > second_strength):
                             print 'Dealer wins on both hands'
-                            self.lost_hands += 2
+                            return 0
                         elif (dealer_strength > first_strength and
                                 dealer_strength <= second_strength):
                             print 'Hand 2 wins'
-                            self.won_hands += 1
                             self.player_chips += wager / 2
-                            self.lost_hands += 1
+                            return 0
                         elif (dealer_strength <= first_strength and
                                 dealer_strength > second_strength):
                             print 'Hand 1 wins'
-                            self.won_hands += 1
                             self.player_chips += wager / 2
-                            self.lost_hands += 1
+                            return 0
                         else:
                             print 'Player wins'
-                            self.won_hands += 2
                             self.player_chips += wager * 2
+                            return 1
                 else:
                     # Dealer is bust
                     print 'Player wins'
-                    self.won_hands += 2
                     self.player_chips += wager * 2
+                    return 1
 
-        # Increment number of hands
-        self.total_hands += 1
         print 'End of round!'
 
     def __init__(self, chips_start):
@@ -517,35 +520,37 @@ class Game():
         self.won_hands = 0
         self.lost_hands = 0
 
-        option = 'no'
-        while not option is 'no':
+        option = ''
+        while option is not 'no' and option is not 'n':
+            self.clear()
             print 'Round ' + str(self.total_hands + 1)
 
-            if self.round() == 1:
+            if (self.round() == 1):
                 # Round returned a 1, which means the player won
                 # Increment the number of winning hands
                 self.won_hands += 1
                 print 'Congratulations, you won this round!'
 
-            elif self.round() == 2:
+            elif (self.round() == 2):
                 # Round returned a 2, which means the round was a draw
                 print 'Push!'
 
             else:
                 # Round returned a 0, which means the player lost
                 # Increment the number of lost hands
-                self.lost_hands = 0
+                self.lost_hands += 0
                 print 'Sorry, you lost!'
 
+            raw_input()
             # Increment the number of total hands
             self.total_hands += 1
 
-            option = raw_input("Go for another round? [yes/no]: ")
+            option = raw_input("Go for another round? [yes]/no: ")
 
 def main():
     """ Test main func for testing purposes """
     game = Game(5000)
-    game.round()
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())
