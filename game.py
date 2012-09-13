@@ -171,6 +171,7 @@ class Game():
 
         # Variables for dealer and player
         dealer_strength = 0
+        hidden_strength = 0 # str w/ face down
         dealer_cards = []
         player_strength = 0
         player_cards = []
@@ -227,6 +228,25 @@ class Game():
                 player_cards)
         raw_input()
         self.clear()
+
+        # Now we have to check if the player and/or the dealer gets a blackjack
+        # Adjust the dealer's "hidden" strength
+        hidden_strength = self.adjust_strength(dealer_cards, hidden_card)
+        if hidden_strength == 21:
+            # Dealer has a blackjack
+            dealer_cards.pop()
+            dealer_cards.append(hidden_card)
+            dealer_strength = self.adjust_strength(dealer_cards)
+            self.display_cards(dealer_strength, dealer_cards, player_strength,
+                    player_cards)
+            print 'Dealer wins by blackjack'
+            raw_input()
+            return 0
+        elif player_strength == 21:
+            # Player has a blackjack
+            print 'You win by blackjack1'
+            raw_input()
+            return 1
 
         # Now let's ask the player for input
         while (option != 's' and option != 'S') and player_strength < 21:
